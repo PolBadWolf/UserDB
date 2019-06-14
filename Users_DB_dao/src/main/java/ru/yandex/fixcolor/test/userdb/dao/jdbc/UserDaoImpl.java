@@ -1,8 +1,14 @@
 package ru.yandex.fixcolor.test.userdb.dao.jdbc;
 
 import ru.yandex.fixcolor.test.userdb.dao.UserDao;
+import ru.yandex.fixcolor.test.userdb.dao.db.DbPool;
 import ru.yandex.fixcolor.test.userdb.dao.domain.User;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class UserDaoImpl implements UserDao {
@@ -15,7 +21,40 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public List<User> loadAllUsers() {
-        return null;
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet resultSet = null;
+
+        List<User> allUsers = new ArrayList<>();
+
+        try {
+            connection = DbPool.getPool().getConnection();
+            statement = connection.prepareStatement(SELECT_ALL_SQL);
+            resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Integer id = resultSet.getInt("id");
+                String name = resultSet.getString("user_name");
+                String password = resultSet.getString("password");
+
+                User user=new User();
+                user.setId(id);
+                user.setUserName(name);
+                user.setPassword(password);
+
+                allUsers.add(user);
+
+                return  allUsers;
+            }
+        } catch (SQLException e) {
+            throw new Exception(e);
+        } finally {
+            DbPool.getPool().closeDbResources(connection, statement, resultSet);
+            // Урок-5 - Модульный проект в Eclipse IDE при помощи Apache Maven
+            // https://www.youtube.com/watch?v=rLbjwEWases
+            // 36.11
+        }
+
     }
 
     @Override
