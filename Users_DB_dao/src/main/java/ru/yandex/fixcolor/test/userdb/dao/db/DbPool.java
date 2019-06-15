@@ -5,6 +5,8 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DbPool {
@@ -31,5 +33,46 @@ public class DbPool {
 
     public Connection getConnection() throws SQLException {
         return dataSource.getConnection();
+    }
+
+    public void closeDbResources(Connection connection) {
+        closeDbResources(connection, null);
+    }
+
+    public void closeDbResources(Connection connection, PreparedStatement statement) {
+        closeDbResources(connection, statement, null);
+    }
+
+    public void closeDbResources(Connection connection, PreparedStatement statement, ResultSet resultSet) {
+        closeResultSet(resultSet);
+        closeStatement(statement);
+        closeConnection(connection);
+    }
+
+    public void closeConnection(Connection connection) {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    public void closeStatement(PreparedStatement statement) {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    public void closeResultSet(ResultSet resultSet) {
+        if (resultSet != null) {
+            try {
+                resultSet.close();
+            } catch (SQLException e) {
+            }
+        }
     }
 }
